@@ -1,3 +1,4 @@
+// api.js - VERSÃO SEGURA
 import axios from 'axios';
 import { supabase } from './supabase';
 
@@ -9,18 +10,15 @@ const api = axios.create({
     },
 });
 
-// 👉 Interceptor de REQUEST (coloca Bearer Token do Supabase)
+// ✅ Interceptor de REQUEST
 api.interceptors.request.use(
     async (config) => {
-        const {
-            data: { session },
-        } = await supabase.auth.getSession();
+        const { data: { session } } = await supabase.auth.getSession();
 
         if (session?.access_token) {
             config.headers.Authorization = `Bearer ${session.access_token}`;
         }
 
-        // útil quando estiver usando ngrok
         config.headers['ngrok-skip-browser-warning'] = 'true';
 
         return config;
@@ -28,13 +26,20 @@ api.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// 👉 Interceptor de RESPONSE (erros globais)
+// ✅ Interceptor de RESPONSE
 api.interceptors.response.use(
     (response) => response.data,
     async (error) => {
+        // Se receber 401 (não autorizado), fazer logout
         if (error.response?.status === 401) {
             await supabase.auth.signOut();
-            window.location.href = '/login';
+
+            const basename = import.meta.env.BASE_URL || '/';
+            const loginPath = basename.endsWith('/')
+                ? `${basename}login`
+                : `${basename}/login`;
+
+            window.location.href = loginPath;
         }
 
         return Promise.reject({

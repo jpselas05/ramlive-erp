@@ -1,25 +1,81 @@
-import { useState } from 'react'; // ← ADICIONAR ESTE IMPORT
-import { Home, Upload, FileText, UserCog, Settings, MapPin, ChevronDown, LogOut } from 'lucide-react';
+import { useState } from 'react';
+import { Home, Upload, FileText, UserCog, Settings, ChevronDown, ChevronRight, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { Link, useLocation } from 'react-router-dom';
-import { formatRoleLabel, ROLES, formatUserName } from '../../utils/formatters';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { formatRoleLabel, formatUserName } from '../../utils/formatters';
 
 export default function Sidebar({ menuOpen, unidades }) {
     const { user, signOut } = useAuth();
     const location = useLocation();
-    const [dashboardExpanded, setDashboardExpanded] = useState(true);
+    const navigate = useNavigate();
+
+    // Estado para controlar quais menus estão expandidos
+    const [expandedMenus, setExpandedMenus] = useState({});
+
     const menuItems = [
-        { id: 'dashboard', path: '/', icon: Home, label: 'Dashboard', roles: ['user', 'gerente', 'admin'] },
-        { id: 'importacao', path: '/importacao', icon: Upload, label: 'Importação', roles: ['gerente', 'admin'] },
-        { id: 'relatorios', path: '/relatorios', icon: FileText, label: 'Relatórios', roles: ['admin'] },
-        { id: 'users', path: '/usuarios', icon: UserCog, label: 'Usuários', roles: ['admin'] },
-        { id: 'config', path: '/configuracoes', icon: Settings, label: 'Configurações', roles: ['admin'] },
+        {
+            id: 'dashboard',
+            path: '/',
+            icon: Home,
+            label: 'Dashboard',
+            roles: ['user', 'gerente', 'admin']
+        },
+        {
+            id: 'importacao',
+            path: '/importacao?tipo=vendas',
+            icon: Upload,
+            label: 'Importação',
+            roles: ['gerente', 'admin'],
+            subItems: [
+                {
+                    id: 'importacao-vendas',
+                    path: '/importacao?tipo=vendas',
+                    label: 'Vendas'
+                },
+                {
+                    id: 'importacao-duplicatas',
+                    path: '/importacao?tipo=duplicatas',
+                    label: 'Duplicatas'
+                },
+                {
+                    id: 'importacao-visualizar',
+                    path: '/importacao?tipo=visualizar',
+                    label: 'Visualizar Mês'
+                },
+                {
+                    id: 'importacao-metas',
+                    path: '/importacao?tipo=metas',
+                    label: 'Metas'
+                }
+            ]
+        },
+        {
+            id: 'relatorios',
+            path: '/relatorios',
+            icon: FileText,
+            label: 'Relatórios',
+            roles: ['admin']
+        },
+        {
+            id: 'users',
+            path: '/usuarios',
+            icon: UserCog,
+            label: 'Usuários',
+            roles: ['admin']
+        },
+        {
+            id: 'config',
+            path: '/configuracoes',
+            icon: Settings,
+            label: 'Configurações',
+            roles: ['admin']
+        },
     ];
+
     const allowedMenuItems = menuItems.filter(item => {
-        if (!item.roles) return true
+        if (!item.roles) return true;
         return item.roles.includes(user?.user_role);
     });
-
 
     const handleLogout = async () => {
         try {
@@ -29,7 +85,49 @@ export default function Sidebar({ menuOpen, unidades }) {
         }
     };
 
-    const isActive = (path) => location.pathname === path;
+    const isActive = (path) => {
+        // Remove query params para comparação
+        const currentPath = location.pathname;
+        const itemPath = path.split('?')[0];
+        return currentPath === itemPath;
+    };
+
+    const isSubItemActive = (path) => {
+        return location.pathname + location.search === path;
+    };
+
+    // Verifica se algum sub-item está ativo
+    const hasActiveSubItem = (item) => {
+        if (!item.subItems) return false;
+        return item.subItems.some(sub => isSubItemActive(sub.path));
+    };
+
+    // Toggle do menu
+    const toggleMenu = (itemId) => {
+        setExpandedMenus(prev => ({
+            ...prev,
+            [itemId]: !prev[itemId]
+        }));
+    };
+
+    // Auto-expandir se estiver na rota ou se tiver sub-item ativo
+    const isMenuExpanded = (item) => {
+        if (!item.subItems) return false;
+        return expandedMenus[item.id] || isActive(item.path) || hasActiveSubItem(item);
+    };
+
+    const handleMenuClick = (item, e) => {
+        // Se tem sub-items, apenas toggle (não navega)
+        if (item.subItems) {
+            e.preventDefault();
+            toggleMenu(item.id);
+
+            // Se não estava expandido, navega para a rota principal
+            if (!isMenuExpanded(item)) {
+                navigate(item.path);
+            }
+        }
+    };
 
     return (
         <aside className={`${menuOpen ? 'w-64' : 'w-20'} bg-gray-800 border-r border-gray-700 transition-all duration-300 flex flex-col`}>
@@ -47,19 +145,53 @@ export default function Sidebar({ menuOpen, unidades }) {
             </div>
 
             {/* Menu */}
-            <nav className="flex-1 p-3">
+            <nav className="flex-1 p-3 overflow-y-auto">
                 {allowedMenuItems.map(item => (
-                    <Link
-                        key={item.id}
-                        to={item.path}
-                        className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl mb-1 transition-all ${isActive(item.path)
-                            ? 'bg-emerald-600 text-white'
-                            : 'text-gray-400 hover:bg-gray-700 hover:text-white'
-                            }`}
-                    >
-                        <item.icon size={20} />
-                        {menuOpen && <span>{item.label}</span>}
-                    </Link>
+                    <div key={item.id} className="mb-1">
+                        {/* Item Principal */}
+                        <Link
+                            to={item.path}
+                            onClick={(e) => handleMenuClick(item, e)}
+                            className={`w-full flex items-center justify-between px-3 py-3 rounded-xl transition-all ${isActive(item.path) || hasActiveSubItem(item)
+                                ? 'bg-emerald-600 text-white'
+                                : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+                                }`}
+                        >
+                            <div className="flex items-center gap-3">
+                                <item.icon size={20} />
+                                {menuOpen && <span>{item.label}</span>}
+                            </div>
+
+                            {/* Seta de expandir (apenas se tiver sub-items e menu aberto) */}
+                            {menuOpen && item.subItems && (
+                                <div className="transition-transform duration-200">
+                                    {isMenuExpanded(item) ? (
+                                        <ChevronDown size={16} />
+                                    ) : (
+                                        <ChevronRight size={16} />
+                                    )}
+                                </div>
+                            )}
+                        </Link>
+
+                        {/* Sub-Items */}
+                        {menuOpen && item.subItems && isMenuExpanded(item) && (
+                            <div className="ml-6 mt-1 space-y-1">
+                                {item.subItems.map(subItem => (
+                                    <Link
+                                        key={subItem.id}
+                                        to={subItem.path}
+                                        className={`block px-3 py-2 rounded-lg text-sm transition-all ${isSubItemActive(subItem.path)
+                                            ? 'bg-emerald-500/20 text-emerald-400 font-medium'
+                                            : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+                                            }`}
+                                    >
+                                        {subItem.label}
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 ))}
             </nav>
 

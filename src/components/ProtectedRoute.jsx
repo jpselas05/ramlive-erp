@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-export default function ProtectedRoute({ children }) {
+export default function ProtectedRoute({ children}) {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -12,6 +12,9 @@ export default function ProtectedRoute({ children }) {
     );
   }
 
+
+
+  // 🔒 Usuário não logado tentando acessar rota protegida
   if (!user) {
     return <Navigate to="/login" replace />;
   }

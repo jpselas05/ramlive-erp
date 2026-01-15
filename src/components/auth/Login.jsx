@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
@@ -10,10 +11,17 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [mode, setMode] = useState('login'); // 'login' ou 'signup'
 
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      navigate('/', { replace: true });
+    }
+  }, [user, navigate]);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,8 +29,8 @@ export default function Login() {
     setLoading(true);
 
     try {
-        await signIn(email, password);
-        navigate('/');
+      await signIn(email, password);
+      navigate('/');
 
     } catch (err) {
       setError(err.message || 'Erro ao autenticar');
@@ -114,18 +122,20 @@ export default function Login() {
               disabled={loading}
               className="w-full bg-gradient-to-r from-[#468EE5] to-[#1E3A5F] hover:from-[#3A78C2] hover:to-[#162C45] text-white font-medium py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
             >
-              {loading ? 'Carregando...' : mode === 'login' ? 'Entrar' : 'Criar Conta'}
+              {loading ? 'Carregando...' : 'Entrar'}
             </button>
           </form>
 
           {/* Esqueci senha */}
-          {mode === 'login' && (
-            <div className="mt-4 text-center">
-              <button className="text-sm text-gray-400 hover:text-[#468EE5] transition-colors">
-                Esqueci minha senha
-              </button>
-            </div>
-          )}
+          <div className="mt-4 text-right">
+            <Link
+              to="/recuperar-senha"
+              className="text-sm text-gray-400 hover:text-[#468EE5] transition-colors"
+            >
+              Esqueci minha senha
+            </Link>
+          </div>
+
         </div>
 
         {/* Footer */}

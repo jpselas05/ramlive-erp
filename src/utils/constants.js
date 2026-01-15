@@ -25,6 +25,6 @@ export const FORMAS_PAGAMENTO = [
 
 export const ROLES = [
   { value: 'user', label: 'Usuário', color: 'bg-blue-500' },
-  { value: 'admin', label: 'Administrador', color: 'bg-purple-500' },
-  { value: 'gerente', label: 'Gerente', color: 'bg-orange-500' }
+  { value: 'gerente', label: 'Gerente', color: 'bg-orange-500' },
+  { value: 'admin', label: 'Administrador', color: 'bg-purple-500' }
 ];

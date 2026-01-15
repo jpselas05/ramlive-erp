@@ -170,7 +170,7 @@ export default function UsersPage() {
               <thead className="bg-gray-900/50">
                 <tr>
                   <th className="text-left px-6 py-4 text-sm font-semibold text-gray-400">Email</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-gray-400">Role</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-gray-400">Cargo</th>
                   <th className="text-left px-6 py-4 text-sm font-semibold text-gray-400">Criado em</th>
                   <th className="text-left px-6 py-4 text-sm font-semibold text-gray-400">Último login</th>
                   <th className="text-right px-6 py-4 text-sm font-semibold text-gray-400">Ações</th>
@@ -312,7 +312,7 @@ export default function UsersPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-2">
-                  Role *
+                  Cargo *
                 </label>
                 <select
                   value={formData.role}

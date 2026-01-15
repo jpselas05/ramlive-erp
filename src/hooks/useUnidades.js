@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getUnidades } from '../lib/endpoints';
+import { getUnidades } from '../api/endpoints';
 
 export function useUnidades() {
   const [unidades, setUnidades] = useState([]);

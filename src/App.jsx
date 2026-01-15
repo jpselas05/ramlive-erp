@@ -11,14 +11,18 @@ import ImportacaoPage from './pages/ImportacaoPage';
 import RelatoriosPage from './pages/RelatoriosPage';
 import ConfiguracoesPage from './pages/ConfiguracoesPage';
 import UsersPage from './pages/UsersPage';
+import RecuperarSenhaPage from './pages/RecuperarSenhaPage';
+import RedefinirSenhaPage from './pages/RedefinirSenhaPage';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <AuthProvider>
         <Routes>
           {/* Rota pública */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/recuperar-senha" element={<RecuperarSenhaPage />} />
+          <Route path="/redefinir-senha" element={<RedefinirSenhaPage />} />
 
           {/* Rotas protegidoas */}
           <Route

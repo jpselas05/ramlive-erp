@@ -1,4 +1,4 @@
-import api from '../lib/api';
+import api from './api';
 
 // ============================================
 // UNIDADES
@@ -19,18 +19,54 @@ export const getVendasMes = async (unidadeId, ano, mes) => {
 };
 
 // NOVO: Parse TXT (sem inserir no banco)
-export const parseTXT = async (arquivoTXT) => {
-  return api.post('/vendas/parse-txt', {
-    arquivo: arquivoTXT,
+export const parseTXTMultiplos = async (arquivos) => {
+  return api.post('/vendas/parse-txt-multiplos', {
+    arquivos, // Array de { nome: string, conteudo: string }
   });
 };
 
 // NOVO: Importar múltiplas vendas em lote
-export const importarLote = async (vendas, opcoes = {}) => {
+export const importarLoteVendas = async (vendas, opcoes = {}) => {
   return api.post('/vendas/importar-lote', {
     vendas,
     opcoes,
   });
+};
+
+// ============================================
+// DUPLICATAS
+// ============================================
+export const getDuplicatasMes = async (unidadeId, ano, mes) => {
+  return api.get(`/duplicatas/${unidadeId}/${ano}/${mes}`);
+};
+
+export const getDuplicatasPorData = async (unidadeId, data) => {
+  return api.get(`/duplicatas/${unidadeId}/${data}`);
+};
+
+export const getResumoMesDuplicatas = async (unidadeId, ano, mes) => {
+  return api.get(`/duplicatas/${unidadeId}/${ano}/${mes}/resumo`);
+};
+
+export const parseDuplicatasTXT = async (arquivos) => {
+  return api.post('/duplicatas/parse-txt-multiplos', {
+    arquivos, // Array de { nome: string, conteudo: string }
+  });
+};
+
+export const importarLoteDuplicatas = async (duplicatas, opcoes = {}) => {
+  return api.post('/duplicatas/importar-lote', {
+    duplicatas,
+    opcoes,
+  });
+};
+
+export const deletarDuplicatasPorData = async (unidadeId, data) => {
+  return api.delete(`/duplicatas/${unidadeId}/${data}`);
+};
+
+export const deletarDuplicata = async (id) => {
+  return api.delete(`/duplicatas/${id}`);
 };
 
 // Método antigo (compatibilidade)
@@ -80,4 +116,27 @@ export const definirMeta = async (unidadeId, ano, mes, valorMeta) => {
 // ============================================
 export const getCurrentUser = async () => {
   return api.get('/auth/me');
+};
+
+// ============================================
+// USUÁRIOS
+// ============================================
+export const getUsers = async () => {
+  return api.get('/users');
+};
+
+export const getUserById = async (id) => {
+  return api.get(`/users/${id}`);
+};
+
+export const createUser = async (userData) => {
+  return api.post('/users', userData);
+};
+
+export const updateUserRole = async (userId, role) => {
+  return api.patch(`/users/${userId}/role`, { role });
+};
+
+export const deleteUser = async (userId) => {
+  return api.delete(`/users/${userId}`);
 };

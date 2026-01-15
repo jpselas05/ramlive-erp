@@ -2,10 +2,12 @@ import { MESES, MESES_COMPLETOS } from './constants';
 import { ROLES } from '../utils/constants';
 
 export const formatCurrency = (value) => {
-    return `R$ ${value.toLocaleString('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    })}`;
+    const amount = typeof value === 'string' ? parseFloat(value) : value;
+
+    return amount.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+    });
 };
 
 export const formatK = (value) => {
@@ -17,18 +19,21 @@ export const formatPercent = (value) => {
 };
 
 export const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR');
+    if (!dateString) return '-';
+
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
 };
+
 
 export const formatRoleLabel = (role) => {
     return ROLES.find(r => r.value === role)?.label || role;
 }
 
 export const formatUserName = (email) => {
-  if (!email) return 'Usuário';
-  const namePart = email.split('@')[0];
-  return namePart.charAt(0).toUpperCase() + namePart.slice(1).toLowerCase();
+    if (!email) return 'Usuário';
+    const namePart = email.split('@')[0];
+    return namePart.charAt(0).toUpperCase() + namePart.slice(1).toLowerCase();
 };
 
 // Re-exportar constantes para facilitar imports

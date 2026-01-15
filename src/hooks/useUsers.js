@@ -1,6 +1,5 @@
-// hooks/useUsers.js
 import { useState, useEffect } from 'react';
-import api from '../lib/api';
+import { getUsers, createUser, updateUserRole, deleteUser } from '../api/endpoints';
 
 export function useUsers() {
   const [users, setUsers] = useState([]);
@@ -12,57 +11,61 @@ export function useUsers() {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get('/users');
-      setUsers(response.data || []);
+      const response = await getUsers(); // Retorna { success, count, data }
+      
+      // ✅ EXTRAIR SÓ O ARRAY DATA
+      setUsers(response.data || []); // ← AQUI ESTAVA O PROBLEMA
+      
     } catch (err) {
       console.error('Erro ao buscar usuários:', err);
-      setError(err.response?.data?.error || 'Erro ao carregar usuários');
+      setError(err.message || 'Erro ao carregar usuários');
+      setUsers([]); // ✅ Garantir que sempre seja array
     } finally {
       setLoading(false);
     }
   };
 
   // Criar novo usuário
-  const createUser = async (userData) => {
+  const create = async (userData) => {
     try {
-      const response = await api.post('/users', userData);
-      await fetchUsers(); // Recarregar lista
-      return { success: true, data: response.data.data };
+      const response = await createUser(userData);
+      await fetchUsers();
+      return { success: true, data: response.data };
     } catch (err) {
       console.error('Erro ao criar usuário:', err);
       return { 
         success: false, 
-        error: err.response?.data?.error || 'Erro ao criar usuário' 
+        error: err.message || 'Erro ao criar usuário' 
       };
     }
   };
 
-  // Atualizar role do usuário
-  const updateUserRole = async (userId, role) => {
+  // Atualizar role
+  const updateRole = async (userId, role) => {
     try {
-      const response = await api.patch(`/users/${userId}/role`, { role });
-      await fetchUsers(); // Recarregar lista
-      return { success: true, data: response.data.data };
+      const response = await updateUserRole(userId, role);
+      await fetchUsers();
+      return { success: true, data: response.data };
     } catch (err) {
       console.error('Erro ao atualizar role:', err);
       return { 
         success: false, 
-        error: err.response?.data?.error || 'Erro ao atualizar role' 
+        error: err.message || 'Erro ao atualizar role' 
       };
     }
   };
 
   // Deletar usuário
-  const deleteUser = async (userId) => {
+  const remove = async (userId) => {
     try {
-      await api.delete(`/users/${userId}`);
-      await fetchUsers(); // Recarregar lista
+      await deleteUser(userId);
+      await fetchUsers();
       return { success: true };
     } catch (err) {
       console.error('Erro ao deletar usuário:', err);
       return { 
         success: false, 
-        error: err.response?.data?.error || 'Erro ao deletar usuário' 
+        error: err.message || 'Erro ao deletar usuário' 
       };
     }
   };
@@ -76,8 +79,8 @@ export function useUsers() {
     loading,
     error,
     refetch: fetchUsers,
-    createUser,
-    updateUserRole,
-    deleteUser
+    createUser: create,
+    updateUserRole: updateRole,
+    deleteUser: remove
   };
 }

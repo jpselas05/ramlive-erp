@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getDashboard } from '../lib/endpoints';
+import { getDashboard } from '../api/endpoints';
 
 export function useDashboard(unidadeId, ano, mes) {
     const [data, setData] = useState(null);
@@ -20,7 +20,7 @@ export function useDashboard(unidadeId, ano, mes) {
                 setData(dashboardData);
                 setError(null);
             }
-            else {setLoading(true)}
+            else { setLoading(true) }
         } catch (err) {
             setError(err.message);
             console.error('Erro ao carregar dashboard:', err);
